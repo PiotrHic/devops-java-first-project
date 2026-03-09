@@ -1,9 +1,16 @@
-FROM openjdk:17
+# Etap budowania aplikacji
+FROM maven:3.9-eclipse-temurin-17 AS build
 
 WORKDIR /app
+COPY pom.xml .
+COPY src ./src
 
-COPY src/Main.java .
+RUN mvn clean package -DskipTests
 
-RUN javac Main.java
+# Etap finalnego obrazu
+FROM eclipse-temurin:17-jdk
 
-CMD ["java", "Main"]
+WORKDIR /app
+COPY --from=build /app/target/*.jar app.jar
+
+CMD ["java", "-jar", "app.jar"]
